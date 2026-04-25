@@ -10,7 +10,7 @@ Computer Graphics & Animation · B.Tech CSE
 
 ## 🌐 Live Demo
 
-🔗 [View Website](https://rgb-color-cube-vaibhavi.netlify.app)
+🔗 [View Website](https://chromaspace.netlify.app/)
 
 ---
 
