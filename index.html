@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RGB Color Model · 3D Visualization</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Clash+Display:wght@400;500;600;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+  <!-- GLOW CURSOR -->
+  <div class="cursor-glow" id="cursorGlow"></div>
+
+  <!-- PARTICLE CANVAS BACKGROUND -->
+  <canvas id="particleCanvas"></canvas>
+  <!-- MODAL OVERLAY -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-card" id="modalCard">
+    <button class="modal-close" id="modalClose">✕</button>
+    <div class="modal-icon" id="modalIcon"></div>
+    <h3 class="modal-title" id="modalTitle"></h3>
+    <p class="modal-body" id="modalBody"></p>
+    <div class="modal-footer-line"></div>
+  </div>
+</div>
+
+  <!-- LOADER -->
+  <div class="loader" id="loader">
+    <div class="loader-inner">
+      <div class="loader-bar"></div>
+      <p class="loader-text">Initializing Color Space<span class="dots">...</span></p>
+    </div>
+  </div>
+
+  <!-- ── NAVBAR ── -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-logo">
+      <span class="nav-dot"></span>CGA 
+    </div>
+    <div class="nav-links">
+      <a href="#cube-section" class="nav-link">Cube</a>
+      <a href="#theory-section" class="nav-link">Theory</a>
+      <a href="#transform-section" class="nav-link">Matrix</a>
+    </div>
+    <div class="nav-badge">3D Transform</div>
+  </nav>
+
+  <!-- ── HERO ── -->
+  <section class="hero" id="hero">
+    <div class="hero-bg-orb orb1"></div>
+    <div class="hero-bg-orb orb2"></div>
+    <div class="hero-bg-orb orb3"></div>
+
+    <div class="hero-content reveal">
+      <p class="hero-eyebrow">
+        <span class="eyebrow-line"></span>
+        Computer Graphics &amp; Animation · Open Source
+      </p>
+      <h1 class="hero-heading">
+        The<br/>
+        <span class="gradient-text">RGB Color</span><br/>
+        <span class="outline-text">Cube</span>
+      </h1>
+      <p class="hero-sub">
+        An interactive 3D visualization of the RGB color model —
+        where every point in space encodes a unique color through
+        rotation transformation.
+      </p>
+      <div class="hero-actions">
+        <a href="#cube-section" class="btn-primary">
+          <span>Explore Cube</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+        </a>
+        <div class="hero-stat-row">
+          <div class="hero-stat"><span class="stat-num">16M+</span><span class="stat-label">Colors</span></div>
+          <div class="hero-divider"></div>
+          <div class="hero-stat"><span class="stat-num">3</span><span class="stat-label">Axes</span></div>
+          <div class="hero-divider"></div>
+          <div class="hero-stat"><span class="stat-num">8</span><span class="stat-label">Vertices</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-scroll-hint">
+      <div class="scroll-wheel"></div>
+      <span>Scroll</span>
+    </div>
+  </section>
+
+  <!-- ── CUBE SECTION ── -->
+  <section class="cube-section" id="cube-section">
+    <div class="section-tag reveal">Interactive 3D Model</div>
+    <h2 class="section-heading reveal">Drag · Rotate · Discover</h2>
+    <p class="section-sub reveal">Interact with the cube to explore how RGB values map to 3D space</p>
+
+    <div class="canvas-wrapper reveal">
+      <div class="canvas-corner tl"></div>
+      <div class="canvas-corner tr"></div>
+      <div class="canvas-corner bl"></div>
+      <div class="canvas-corner br"></div>
+      <canvas id="threeCanvas"></canvas>
+      <div class="cube-label top-left">WHITE · (255,255,255)</div>
+      <div class="cube-label bot-right">BLACK · (0,0,0)</div>
+      <div class="scan-line"></div>
+    </div>
+
+    <div class="controls reveal">
+      <button class="ctrl-btn active" id="btnRotate">
+        <span class="btn-icon">⟳</span> Auto Rotate
+      </button>
+      <button class="ctrl-btn" id="btnWire">
+        <span class="btn-icon">⬡</span> Wireframe
+      </button>
+      <button class="ctrl-btn" id="btnAxes">
+        <span class="btn-icon">✛</span> Show Axes
+      </button>
+      <button class="ctrl-btn" id="btnExplode">
+        <span class="btn-icon">💥</span> Explode
+      </button>
+      <button class="ctrl-btn" id="btnReset">
+        <span class="btn-icon">↺</span> Reset
+      </button>
+    </div>
+
+    <div class="color-readout reveal">
+      <div class="readout-swatch" id="readoutBox"></div>
+      <div class="readout-bars">
+        <div class="channel-row">
+          <span class="ch-label r">R</span>
+          <div class="ch-track"><div class="ch-fill red-fill" id="rFill"></div></div>
+          <span class="ch-val" id="rVal">0</span>
+        </div>
+        <div class="channel-row">
+          <span class="ch-label g">G</span>
+          <div class="ch-track"><div class="ch-fill green-fill" id="gFill"></div></div>
+          <span class="ch-val" id="gVal">0</span>
+        </div>
+        <div class="channel-row">
+          <span class="ch-label b">B</span>
+          <div class="ch-track"><div class="ch-fill blue-fill" id="bFill"></div></div>
+          <span class="ch-val" id="bVal">0</span>
+        </div>
+      </div>
+      <div class="readout-hex" id="readoutHex">#000000</div>
+    </div>
+  </section>
+
+  <!-- ── THEORY SECTION ── -->
+  <section class="theory-section" id="theory-section">
+    <div class="section-tag reveal">Theory</div>
+    <h2 class="section-heading reveal">How the RGB Cube Works</h2>
+
+    <div class="theory-grid">
+      <div class="theory-card reveal" style="--delay:0s">
+        <div class="card-glow"></div>
+        <div class="theory-icon-wrap"><span>🔴</span></div>
+        <h3>Red Axis · X</h3>
+        <p>Ranges 0→255 along X. The red channel determines how much red light is mixed into the final color.</p>
+        <div class="card-line"></div>
+      </div>
+      <div class="theory-card reveal" style="--delay:0.1s">
+        <div class="card-glow"></div>
+        <div class="theory-icon-wrap"><span>🟢</span></div>
+        <h3>Green Axis · Y</h3>
+        <p>Ranges 0→255 along Y. Green is the most sensitive channel to the human eye — dominant in luminance.</p>
+        <div class="card-line"></div>
+      </div>
+      <div class="theory-card reveal" style="--delay:0.2s">
+        <div class="card-glow"></div>
+        <div class="theory-icon-wrap"><span>🔵</span></div>
+        <h3>Blue Axis · Z</h3>
+        <p>Ranges 0→255 along Z. Blue carries the shortest wavelength and contributes to depth perception.</p>
+        <div class="card-line"></div>
+      </div>
+      <div class="theory-card reveal" style="--delay:0.3s">
+        <div class="card-glow"></div>
+        <div class="theory-icon-wrap"><span>⬛</span></div>
+        <h3>Origin · Black</h3>
+        <p>The origin (0,0,0) is absolute black — no light emitted on any channel. The cube's darkest vertex.</p>
+        <div class="card-line"></div>
+      </div>
+      <div class="theory-card reveal" style="--delay:0.4s">
+        <div class="card-glow"></div>
+        <div class="theory-icon-wrap"><span>⬜</span></div>
+        <h3>Diagonal · White</h3>
+        <p>The opposite vertex (255,255,255) is pure white — maximum intensity across all three channels simultaneously.</p>
+        <div class="card-line"></div>
+      </div>
+      <div class="theory-card reveal" style="--delay:0.5s">
+        <div class="card-glow"></div>
+        <div class="theory-icon-wrap"><span>🔄</span></div>
+        <h3>3D Rotation</h3>
+        <p>Rotation about X, Y, Z axes reveals the color transitions across all six faces of the cube.</p>
+        <div class="card-line"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── VERTICES SECTION ── -->
+  <section class="vertices-section">
+    <div class="section-tag reveal">Color Space</div>
+    <h2 class="section-heading reveal">8 Vertices of the RGB Cube</h2>
+    <div class="vertex-grid" id="vertexGrid"></div>
+  </section>
+
+  <!-- ── TRANSFORM SECTION ── -->
+  <section class="transform-section" id="transform-section">
+    <div class="section-tag reveal">Mathematics</div>
+    <h2 class="section-heading reveal">3D Rotation Transformation</h2>
+
+    <div class="transform-layout reveal">
+      <div class="matrix-block">
+        <p class="matrix-title">Rotation about Y-axis (θ)</p>
+        <div class="matrix-wrap">
+          <span class="bracket left">[</span>
+          <table class="matrix-table">
+            <tr><td>cos θ</td><td>0</td><td>sin θ</td><td>0</td></tr>
+            <tr><td>0</td><td>1</td><td>0</td><td>0</td></tr>
+            <tr><td>-sin θ</td><td>0</td><td>cos θ</td><td>0</td></tr>
+            <tr><td>0</td><td>0</td><td>0</td><td>1</td></tr>
+          </table>
+          <span class="bracket right">]</span>
+        </div>
+      </div>
+
+      <div class="transform-desc-block">
+        <div class="transform-point">
+          <div class="tp-dot"></div>
+          <div>
+            <strong>Homogeneous Coordinates</strong>
+            <p>The 4×4 matrix enables both rotation and translation in a unified representation.</p>
+          </div>
+        </div>
+        <div class="transform-point">
+          <div class="tp-dot"></div>
+          <div>
+            <strong>Continuous Rotation</strong>
+            <p>θ increments each frame — creating the smooth auto-rotation you see in the cube above.</p>
+          </div>
+        </div>
+        <div class="transform-point">
+          <div class="tp-dot"></div>
+          <div>
+            <strong>Open Source Tool</strong>
+            <p>Three.js applies WebGL matrix operations under the hood using these exact formulas.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CREDIT SECTION ── -->
+   <!-- ── HOW IT WORKS ── -->
+  <section class="how-section" id="how-section">
+    <div class="section-tag reveal">Mechanism</div>
+    <h2 class="section-heading reveal">How It Works</h2>
+    <p class="section-sub reveal">The journey from electric signal to visible color on your screen</p>
+
+    <div class="how-steps">
+
+      <div class="how-step reveal" style="--delay:0s">
+        <div class="step-number">01</div>
+        <div class="step-content">
+          <h3>Light as the Medium</h3>
+          <p>RGB is an <strong>additive color model</strong> — it works by emitting light, not reflecting it. Each pixel on your screen contains three tiny LEDs: one red, one green, one blue. When all three are off, you see black. When all three are at full power, you see white.</p>
+        </div>
+      </div>
+
+      <div class="how-connector reveal"></div>
+
+      <div class="how-step reveal" style="--delay:0.1s">
+        <div class="step-number">02</div>
+        <div class="step-content">
+          <h3>Digital Encoding (0–255)</h3>
+          <p>Each channel stores its intensity as an 8-bit integer — values from <strong>0 to 255</strong>. This gives 256 levels per channel. Combined across three channels: 256 × 256 × 256 = <strong>16,777,216 unique colors</strong> — the full RGB color space.</p>
+        </div>
+      </div>
+
+      <div class="how-connector reveal"></div>
+
+      <div class="how-step reveal" style="--delay:0.2s">
+        <div class="step-number">03</div>
+        <div class="step-content">
+          <h3>Mapping to 3D Space</h3>
+          <p>Every RGB color can be plotted as a point in 3D space — R on X-axis, G on Y-axis, B on Z-axis. This forms the <strong>RGB Color Cube</strong>. The 3D rotation transformation lets us navigate and inspect every color from any angle.</p>
+        </div>
+      </div>
+
+      <div class="how-connector reveal"></div>
+
+      <div class="how-step reveal" style="--delay:0.3s">
+        <div class="step-number">04</div>
+        <div class="step-content">
+          <h3>Rendering on Screen</h3>
+          <p>The GPU reads each pixel's RGB triplet and drives the three sub-pixel LEDs at corresponding intensities. Your eye blends these three light sources into a single perceived color — a process called <strong>optical mixing</strong>, exploited by every modern display.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── APPLICATIONS ── -->
+  <section class="apps-section" id="apps-section">
+    <div class="section-tag reveal">Real World</div>
+    <h2 class="section-heading reveal">Applications of RGB Color Model</h2>
+    <p class="section-sub reveal">Where this model powers the technology around you every day</p>
+
+    <div class="apps-grid">
+      <div class="app-card reveal" style="--delay:0s">
+        <div class="app-icon">🖥️</div>
+        <div class="app-info">
+          <h3>Digital Displays</h3>
+          <p>Every monitor, smartphone, tablet and TV uses RGB sub-pixels to render color. Each pixel is an independent RGB triplet controlled by the GPU.</p>
+          <div class="app-tag">LCD · OLED · AMOLED</div>
+        </div>
+      </div>
+      <div class="app-card reveal" style="--delay:0.08s">
+        <div class="app-icon">📷</div>
+        <div class="app-info">
+          <h3>Digital Photography</h3>
+          <p>Camera sensors capture light through red, green and blue filters. Every JPEG, PNG and RAW image stores pixel data as RGB triplets.</p>
+          <div class="app-tag">JPEG · PNG · RAW</div>
+        </div>
+      </div>
+      <div class="app-card reveal" style="--delay:0.16s">
+        <div class="app-icon">🎮</div>
+        <div class="app-info">
+          <h3>Computer Graphics & Games</h3>
+          <p>Game engines and rendering pipelines use RGB to define material colors, lighting, shading and post-processing effects in real time.</p>
+          <div class="app-tag">OpenGL · WebGL · Unity</div>
+        </div>
+      </div>
+      <div class="app-card reveal" style="--delay:0.24s">
+        <div class="app-icon">🌐</div>
+        <div class="app-info">
+          <h3>Web Design & UI</h3>
+          <p>CSS colors are defined in RGB or HEX (which is just RGB in base-16). Every button, background and gradient you see on the web is an RGB value.</p>
+          <div class="app-tag">CSS · HEX · rgba()</div>
+        </div>
+      </div>
+      <div class="app-card reveal" style="--delay:0.32s">
+        <div class="app-icon">🩺</div>
+        <div class="app-info">
+          <h3>Medical Imaging</h3>
+          <p>MRI scans, microscopy and thermal imaging use false-color RGB mapping to highlight different tissue types, temperatures and anomalies.</p>
+          <div class="app-tag">MRI · CT · Microscopy</div>
+        </div>
+      </div>
+      <div class="app-card reveal" style="--delay:0.40s">
+        <div class="app-icon">🤖</div>
+        <div class="app-info">
+          <h3>Machine Learning & CV</h3>
+          <p>Computer vision models take RGB image tensors as input. Image classification, object detection and face recognition all process RGB arrays.</p>
+          <div class="app-tag">CNN · OpenCV · TensorFlow</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CONCLUSION ── -->
+  <section class="conclusion-section" id="conclusion-section">
+    <div class="concl-bg-orb co1"></div>
+    <div class="concl-bg-orb co2"></div>
+    <div class="section-tag reveal">Conclusion</div>
+    <h2 class="section-heading reveal">Key Takeaways</h2>
+
+    <div class="concl-layout">
+      <div class="concl-main reveal">
+        <p>
+          The <strong>RGB Color Model</strong> is one of the most fundamental concepts in Computer
+          Graphics. By representing color as a point in three-dimensional space — with Red, Green
+          and Blue as orthogonal axes — it provides a mathematically precise and hardware-compatible
+          framework for color encoding.
+        </p>
+        <p>
+          Through this 3D visualization, we see how <strong>3D rotation transformation</strong>
+          reveals the structure of the color cube — demonstrating that color is not just a visual
+          experience but a geometric one. Every shade, tint and hue has an exact coordinate
+          in this space.
+        </p>
+        <p>
+          The RGB model's additive nature makes it ideal for <strong>light-emitting devices</strong>
+          like screens and projectors, distinguishing it from subtractive models like CMYK used in
+          printing. Its 24-bit encoding supports over 16 million colors — more than the human eye
+          can distinguish.
+        </p>
+      </div>
+
+      <div class="concl-points">
+        <div class="concl-point reveal" style="--delay:0s">
+          <span class="cp-icon">✦</span>
+          <span>RGB is an <strong>additive</strong> light-based color model</span>
+        </div>
+        <div class="concl-point reveal" style="--delay:0.08s">
+          <span class="cp-icon">✦</span>
+          <span>Each channel encodes intensity as an <strong>8-bit value</strong> (0–255)</span>
+        </div>
+        <div class="concl-point reveal" style="--delay:0.16s">
+          <span class="cp-icon">✦</span>
+          <span>The cube has <strong>16.7 million</strong> possible color coordinates</span>
+        </div>
+        <div class="concl-point reveal" style="--delay:0.24s">
+          <span class="cp-icon">✦</span>
+          <span><strong>Rotation transformation</strong> navigates the full color space</span>
+        </div>
+        <div class="concl-point reveal" style="--delay:0.32s">
+          <span class="cp-icon">✦</span>
+          <span>Used universally in <strong>displays, games, web and imaging</strong></span>
+        </div>
+        <div class="concl-point reveal" style="--delay:0.40s">
+          <span class="cp-icon">✦</span>
+          <span>Open-source tools like <strong>Three.js</strong> make 3D color exploration accessible</span>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="credit-section" id="credit-section">
+    <div class="credit-orb c1"></div>
+    <div class="credit-orb c2"></div>
+    <canvas id="creditCanvas"></canvas>
+    <div class="credit-content reveal">
+      <div class="credit-badge">Crafted with ♥</div>
+      <h2 class="credit-name">Vaibhavi<br/><span>Sharma</span></h2>
+      <p class="credit-sub">Computer Graphics &amp; Animation · <br/>B.Tech CSE · RGB Color Model</p>
+      <div class="credit-tags">
+        <span>Three.js</span><span>WebGL</span><span>Open Source</span><span>RGB Color Model</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <footer class="footer">
+    <div class="footer-left">
+      <span class="footer-dot"></span>
+      RGB Color Model · 3D Visualization
+    </div>
+    <div class="footer-center">Made by <strong>Vaibhavi Sharma</strong></div>
+    <div class="footer-right">Three.js · Open Source</div>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
